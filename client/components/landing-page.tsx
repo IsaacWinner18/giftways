@@ -72,12 +72,12 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/giveaways">
-              <Button variant="ghost" className="text-purple-300 hover:text-white">
+              <Button className="text-purple-300 hover:text-white bg-gradient-to-r from-purple-600 to-pink-600">
                 <Search className="w-4 h-4 mr-2" />
                 Browse Giveaways
               </Button>
             </Link>
-            <div className="text-sm text-purple-300">Demo: demo@giftways.com / demo123</div>
+            {/* <div className="text-sm text-purple-300">Demo: demo@giftways.com / demo123</div> */}
           </div>
         </div>
       </header>
@@ -152,8 +152,8 @@ export function LandingPage() {
               </Link>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-white/20 text-white hover:bg-white/10"
+        
+                className="border-white/20 text-white hover:from-purple-700 hover:to-pink-700 bg-gradient-to-r from-purple-600 to-pink-600"
                 onClick={() => document.getElementById("auth-form")?.scrollIntoView({ behavior: "smooth" })}
               >
                 <Plus className="w-5 h-5 mr-2" />
@@ -281,13 +281,13 @@ export function LandingPage() {
                   </button>
                 </div>
 
-                <div className="text-center text-xs text-gray-400 bg-white/5 p-3 rounded-lg">
+                {/* <div className="text-center text-xs text-gray-400 bg-white/5 p-3 rounded-lg">
                   <strong>Demo Credentials:</strong>
                   <br />
                   Email: demo@giftways.com
                   <br />
                   Password: demo123
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           </div>
