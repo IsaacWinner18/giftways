@@ -1,0 +1,428 @@
+"use client"
+
+import { Label } from "@/components/ui/label"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Gift,
+  ArrowLeft,
+  Users,
+  DollarSign,
+  ExternalLink,
+  Download,
+  BarChart3,
+  Settings,
+  Eye,
+  Copy,
+} from "lucide-react"
+import Link from "next/link"
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface CampaignData {
+  id: string;
+  title: string;
+  description: string;
+  creatorId: string;
+  creatorName: string;
+  totalAmount: number;
+  maxParticipants: number;
+  currentParticipants: number;
+  amountPerPerson: number;
+  status: string;
+  createdAt: string;
+  campaignUrl: string;
+  socialRequirements: Array<{
+    id: string;
+    platform: string;
+    action: string;
+    profileUrl: string;
+    displayName: string;
+  }>;
+}
+
+interface ParticipantData {
+  id: string;
+  name: string;
+  email: string;
+  joinedAt: string;
+  status: string;
+  bankDetails: string;
+}
+
+export default function CampaignDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const [campaign, setCampaign] = useState<CampaignData | null>(null)
+  const [participants, setParticipants] = useState<ParticipantData[]>([])
+  const [activeTab, setActiveTab] = useState("overview")
+  const [loading, setLoading] = useState(true)
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null)
+
+  // Resolve params
+  useEffect(() => {
+    params.then((resolved) => {
+      setResolvedParams(resolved)
+    })
+  }, [params])
+
+  useEffect(() => {
+    if (!resolvedParams) return
+    const fetchCampaign = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(`${API_URL}/campaigns/${resolvedParams.id}`)
+        const data = await res.json()
+        if (data.success) {
+          setCampaign(data.campaign)
+        } else {
+          setCampaign(null)
+        }
+      } catch {
+        setCampaign(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCampaign()
+  }, [resolvedParams])
+
+  useEffect(() => {
+    if (!resolvedParams) return
+    const fetchParticipants = async () => {
+      try {
+        const res = await fetch(`${API_URL}/participants/${resolvedParams.id}`)
+        const data = await res.json()
+        if (data.success) {
+          setParticipants(data.participants)
+        } else {
+          setParticipants([])
+        }
+      } catch {
+        setParticipants([])
+      }
+    }
+    fetchParticipants()
+  }, [resolvedParams])
+
+  const handleCopyUrl = () => {
+    if (campaign) {
+      navigator.clipboard.writeText(campaign.campaignUrl)
+      alert("Campaign URL copied to clipboard!")
+    }
+  }
+
+  const handleExportParticipants = () => {
+    alert("Exporting participants data...")
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "verified":
+        return "bg-green-100 text-green-800"
+      case "pending":
+        return "bg-yellow-100 text-yellow-800"
+      case "rejected":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  if (loading || !resolvedParams) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+      </div>
+    )
+  }
+
+  if (!campaign) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center border-0 shadow-xl">
+          <CardContent className="pt-8 pb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h2>
+            <p className="text-gray-600 mb-6">The giveaway you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+            <Link href="/campaigns">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                Browse Other Campaigns
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/campaigns">
+                <Button variant="outline" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Campaigns
+                </Button>
+              </Link>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Gift className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">{campaign.title}</h1>
+                  <div className="text-sm text-gray-500">Campaign Details</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleCopyUrl}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy URL
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/campaign/${campaign.id}`}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Public
+                </Link>
+              </Button>
+              <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600">
+                <Settings className="w-4 h-4 mr-2" />
+                Manage
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Campaign Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Total Prize</p>
+                  <p className="text-2xl font-bold">₦{campaign.totalAmount.toLocaleString()}</p>
+                </div>
+                <DollarSign className="w-8 h-8 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Participants</p>
+                  <p className="text-2xl font-bold">
+                    {campaign.currentParticipants}/{campaign.maxParticipants}
+                  </p>
+                </div>
+                <Users className="w-8 h-8 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-emerald-100 text-sm font-medium">Per Winner</p>
+                  <p className="text-2xl font-bold">₦{campaign.amountPerPerson}</p>
+                </div>
+                <Gift className="w-8 h-8 text-emerald-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">Completion</p>
+                  <p className="text-2xl font-bold">
+                    {Math.round((campaign.currentParticipants / campaign.maxParticipants) * 100)}%
+                  </p>
+                </div>
+                <BarChart3 className="w-8 h-8 text-orange-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="participants">Participants</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Campaign Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">Title</Label>
+                    <p className="text-lg font-semibold">{campaign.title}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">Description</Label>
+                    <p className="text-gray-700">{campaign.description}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Status</Label>
+                      <Badge className="mt-1 capitalize">{campaign.status}</Badge>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Created</Label>
+                      <p className="text-gray-700">{new Date(campaign.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Social Requirements</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {campaign.socialRequirements.map((req) => (
+                    <div key={req.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium capitalize">
+                          {req.action} {req.displayName}
+                        </p>
+                        <p className="text-sm text-gray-600 capitalize">on {req.platform}</p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => window.open(req.profileUrl, "_blank")}>
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Campaign Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span>Participants</span>
+                    <span>
+                      {campaign.currentParticipants} of {campaign.maxParticipants}
+                    </span>
+                  </div>
+                  <Progress value={(campaign.currentParticipants / campaign.maxParticipants) * 100} className="h-3" />
+                  <div className="text-center text-sm text-gray-600">
+                    {campaign.maxParticipants - campaign.currentParticipants} spots remaining
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="participants" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Participants ({participants.length})</CardTitle>
+                    <CardDescription>Manage campaign participants and their verification status</CardDescription>
+                  </div>
+                  <Button onClick={handleExportParticipants} variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead>Bank Details</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {participants.map((participant) => (
+                      <TableRow key={participant.id}>
+                        <TableCell className="font-medium">{participant.name}</TableCell>
+                        <TableCell>{participant.email}</TableCell>
+                        <TableCell>{new Date(participant.joinedAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{participant.bankDetails}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(participant.status)}>{participant.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="outline" size="sm">
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Campaign Analytics</CardTitle>
+                <CardDescription>Track your campaign performance and engagement</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics Coming Soon</h3>
+                  <p className="text-gray-600">
+                    Detailed analytics and insights will be available here to help you track your campaign performance.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Campaign Settings</CardTitle>
+                <CardDescription>Manage your campaign configuration and preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Settings Panel</h3>
+                  <p className="text-gray-600">Campaign settings and configuration options will be available here.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
