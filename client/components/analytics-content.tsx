@@ -1,31 +1,134 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { useAuth } from "@/lib/auth-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { BarChart3, TrendingUp, Users, DollarSign, Target, Award, Activity } from "lucide-react"
+import { BarChart3, TrendingUp, Users, DollarSign, Target, Award, Activity, Loader2 } from "lucide-react"
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface AnalyticsData {
+  totalRevenue: number;
+  totalParticipants: number;
+  conversionRate: number;
+  avgCampaignValue: number;
+  monthlyGrowth: number;
+  topPlatforms: Array<{
+    name: string;
+    participants: number;
+    percentage: number;
+  }>;
+  recentPerformance: Array<{
+    month: string;
+    campaigns: number;
+    participants: number;
+    revenue: number;
+  }>;
+  totalCampaigns: number;
+  activeCampaigns: number;
+  completedCampaigns: number;
+}
 
 export function AnalyticsContent() {
-  // Mock analytics data
-  const analyticsData = {
-    totalRevenue: 2500000,
-    totalParticipants: 5420,
-    conversionRate: 68.5,
-    avgCampaignValue: 45000,
-    monthlyGrowth: 15.2,
-    topPlatforms: [
-      { name: "Instagram", participants: 2100, percentage: 38.7 },
-      { name: "Twitter", participants: 1800, percentage: 33.2 },
-      { name: "TikTok", participants: 1200, percentage: 22.1 },
-      { name: "YouTube", participants: 320, percentage: 5.9 },
-    ],
-    recentPerformance: [
-      { month: "Jan", campaigns: 8, participants: 420, revenue: 180000 },
-      { month: "Feb", campaigns: 12, participants: 680, revenue: 290000 },
-      { month: "Mar", campaigns: 15, participants: 890, revenue: 380000 },
-      { month: "Apr", campaigns: 18, participants: 1200, revenue: 520000 },
-      { month: "May", campaigns: 22, participants: 1450, revenue: 650000 },
-      { month: "Jun", campaigns: 25, participants: 1780, revenue: 780000 },
-    ],
+  const { user } = useAuth()
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!user?.id && !user?._id) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const userId = user?.id || user?._id
+        const response = await fetch(`${API_URL}/analytics/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+        
+        if (data.success && data.analytics) {
+          setAnalyticsData(data.analytics)
+        } else {
+          throw new Error(data.error || "Failed to fetch analytics")
+        }
+      } catch (err) {
+        console.error("Analytics fetch error:", err)
+        setError(err instanceof Error ? err.message : "Failed to fetch analytics")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAnalytics()
+  }, [user])
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="text-gray-600 mt-1">Track your campaign performance and audience insights</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span>Loading analytics...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="text-gray-600 mt-1">Track your campaign performance and audience insights</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-red-600 mb-2">Error loading analytics</p>
+            <p className="text-gray-600 text-sm">{error}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!analyticsData) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="text-gray-600 mt-1">Track your campaign performance and audience insights</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Analytics Data</h3>
+            <p className="text-gray-600">
+              Create your first campaign to start seeing analytics and insights.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -121,31 +224,38 @@ export function AnalyticsContent() {
             <CardDescription>Participant distribution across social platforms</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {analyticsData.topPlatforms.map((platform, index) => (
-              <div key={platform.name} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        index === 0
-                          ? "bg-pink-500"
-                          : index === 1
-                            ? "bg-blue-500"
-                            : index === 2
-                              ? "bg-gray-800"
-                              : "bg-red-500"
-                      }`}
-                    />
-                    <span className="font-medium">{platform.name}</span>
+            {analyticsData.topPlatforms.length > 0 ? (
+              analyticsData.topPlatforms.map((platform, index) => (
+                <div key={platform.name} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          index === 0
+                            ? "bg-pink-500"
+                            : index === 1
+                              ? "bg-blue-500"
+                              : index === 2
+                                ? "bg-gray-800"
+                                : "bg-red-500"
+                        }`}
+                      />
+                      <span className="font-medium">{platform.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">{platform.participants.toLocaleString()}</div>
+                      <div className="text-sm text-gray-600">{platform.percentage}%</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-semibold">{platform.participants.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">{platform.percentage}%</div>
-                  </div>
+                  <Progress value={platform.percentage} className="h-2" />
                 </div>
-                <Progress value={platform.percentage} className="h-2" />
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <p>No platform data available</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
@@ -160,23 +270,30 @@ export function AnalyticsContent() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {analyticsData.recentPerformance.slice(-3).map((month) => (
-                <div key={month.month} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold">
-                      {month.month}
+              {analyticsData.recentPerformance.length > 0 ? (
+                analyticsData.recentPerformance.slice(-3).map((month) => (
+                  <div key={month.month} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold">
+                        {month.month}
+                      </div>
+                      <div>
+                        <div className="font-semibold">{month.campaigns} Campaigns</div>
+                        <div className="text-sm text-gray-600">{month.participants} participants</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-semibold">{month.campaigns} Campaigns</div>
-                      <div className="text-sm text-gray-600">{month.participants} participants</div>
+                    <div className="text-right">
+                      <div className="font-bold text-lg">₦{month.revenue.toLocaleString()}</div>
+                      <div className="text-sm text-gray-600">Revenue</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-lg">₦{month.revenue.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">Revenue</div>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                  <p>No performance data available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -198,7 +315,12 @@ export function AnalyticsContent() {
                 <span className="font-semibold text-green-900">Growth Trend</span>
               </div>
               <p className="text-sm text-green-800">
-                Your campaigns are showing consistent growth with a 15.2% increase this month.
+                {analyticsData.monthlyGrowth > 0 
+                  ? `Your campaigns are showing consistent growth with a ${analyticsData.monthlyGrowth}% increase this month.`
+                  : analyticsData.monthlyGrowth < 0
+                    ? `Your campaigns show a ${Math.abs(analyticsData.monthlyGrowth)}% decrease this month. Consider optimizing your strategy.`
+                    : "Your campaigns are maintaining steady performance this month."
+                }
               </p>
             </div>
 
@@ -207,10 +329,10 @@ export function AnalyticsContent() {
                 <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
                   <Users className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-semibold text-blue-900">Best Platform</span>
+                <span className="font-semibold text-blue-900">Campaign Overview</span>
               </div>
               <p className="text-sm text-blue-800">
-                Instagram generates the highest participant engagement at 38.7% of total participants.
+                You have {analyticsData.totalCampaigns} total campaigns with {analyticsData.activeCampaigns} currently active and {analyticsData.completedCampaigns} completed.
               </p>
             </div>
 
@@ -219,10 +341,13 @@ export function AnalyticsContent() {
                 <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
                   <Target className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-semibold text-purple-900">Optimization</span>
+                <span className="font-semibold text-purple-900">Engagement</span>
               </div>
               <p className="text-sm text-purple-800">
-                Consider increasing campaign budgets during peak engagement hours for better results.
+                {analyticsData.topPlatforms.length > 0 
+                  ? `${analyticsData.topPlatforms[0].name} generates the highest engagement at ${analyticsData.topPlatforms[0].percentage}% of total participants.`
+                  : "Start creating campaigns to see platform performance insights."
+                }
               </p>
             </div>
           </div>

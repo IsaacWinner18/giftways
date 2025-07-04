@@ -491,11 +491,11 @@ export default function CampaignPage({ params }: { params: Promise<CampaignParam
                       <div className="space-y-3">
                         {safeArray(campaignData.socialRequirements).map((requirement, index) => (
                           <div
-                            key={requirement.id || index}
+                            key={requirement.id || `requirement-${index}`}
                             className={`p-4 rounded-lg border-2 transition-all ${
-                              completedTasks.includes(requirement.id)
+                              completedTasks.includes(requirement.id || `requirement-${index}`)
                                 ? "border-green-200 bg-green-50"
-                                : visitedTasks.includes(requirement.id)
+                                : visitedTasks.includes(requirement.id || `requirement-${index}`)
                                   ? "border-blue-200 bg-blue-50"
                                   : "border-gray-200 bg-gray-50"
                             }`}
@@ -508,10 +508,10 @@ export default function CampaignPage({ params }: { params: Promise<CampaignParam
                                     {getActionText(requirement.action)} {requirement.displayName}
                                   </div>
                                   <div className="text-sm text-gray-600 capitalize">on {requirement.platform}</div>
-                                  {visitedTasks.includes(requirement.id) && taskTimers[requirement.id] > 0 && (
+                                  {visitedTasks.includes(requirement.id || `requirement-${index}`) && taskTimers[requirement.id || `requirement-${index}`] > 0 && (
                                     <div className="flex items-center gap-1 text-xs text-blue-600 mt-1">
                                       <Clock className="w-3 h-3" />
-                                      Wait {taskTimers[requirement.id]}s to mark as done
+                                      Wait {taskTimers[requirement.id || `requirement-${index}`]}s to mark as done
                                     </div>
                                   )}
                                 </div>
@@ -520,40 +520,40 @@ export default function CampaignPage({ params }: { params: Promise<CampaignParam
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => handleVisitTask(requirement.id, requirement.profileUrl)}
+                                  onClick={() => handleVisitTask(requirement.id || `requirement-${index}`, requirement.profileUrl)}
                                   className={
-                                    visitedTasks.includes(requirement.id) ? "border-blue-500 text-blue-600" : ""
+                                    visitedTasks.includes(requirement.id || `requirement-${index}`) ? "border-blue-500 text-blue-600" : ""
                                   }
                                 >
                                   <ExternalLink className="w-4 h-4 mr-1" />
-                                  {visitedTasks.includes(requirement.id) ? "Visited" : "Visit"}
+                                  {visitedTasks.includes(requirement.id || `requirement-${index}`) ? "Visited" : "Visit"}
                                 </Button>
                                 <Button
                                   size="sm"
-                                  variant={completedTasks.includes(requirement.id) ? "default" : "outline"}
+                                  variant={completedTasks.includes(requirement.id || `requirement-${index}`) ? "default" : "outline"}
                                   onClick={() =>
-                                    completedTasks.includes(requirement.id)
-                                      ? handleTaskIncomplete(requirement.id)
-                                      : handleTaskComplete(requirement.id)
+                                    completedTasks.includes(requirement.id || `requirement-${index}`)
+                                      ? handleTaskIncomplete(requirement.id || `requirement-${index}`)
+                                      : handleTaskComplete(requirement.id || `requirement-${index}`)
                                   }
-                                  disabled={!canMarkTaskDone(requirement.id)}
+                                  disabled={!canMarkTaskDone(requirement.id || `requirement-${index}`)}
                                   className={
-                                    completedTasks.includes(requirement.id)
+                                    completedTasks.includes(requirement.id || `requirement-${index}`)
                                       ? "bg-green-600 hover:bg-green-700"
-                                      : !canMarkTaskDone(requirement.id)
+                                      : !canMarkTaskDone(requirement.id || `requirement-${index}`)
                                         ? "opacity-50 cursor-not-allowed"
                                         : ""
                                   }
                                 >
-                                  {completedTasks.includes(requirement.id) ? (
+                                  {completedTasks.includes(requirement.id || `requirement-${index}`) ? (
                                     <>
                                       <Check className="w-4 h-4 mr-1" />
                                       Done
                                     </>
-                                  ) : taskTimers[requirement.id] > 0 ? (
+                                  ) : taskTimers[requirement.id || `requirement-${index}`] > 0 ? (
                                     <>
                                       <Clock className="w-4 h-4 mr-1" />
-                                      {taskTimers[requirement.id]}s
+                                      {taskTimers[requirement.id || `requirement-${index}`]}s
                                     </>
                                   ) : (
                                     "Mark Done"
@@ -709,8 +709,8 @@ export default function CampaignPage({ params }: { params: Promise<CampaignParam
                             <CardTitle className="text-lg text-blue-900">Completed Tasks</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-2">
-                            {safeArray(campaignData.socialRequirements).map((requirement) => (
-                              <div key={requirement.id} className="flex items-center gap-2 text-sm">
+                            {safeArray(campaignData.socialRequirements).map((requirement, index) => (
+                              <div key={requirement.id || `requirement-${index}`} className="flex items-center gap-2 text-sm">
                                 <CheckCircle className="w-4 h-4 text-green-600" />
                                 <span className="text-green-700">
                                   {getActionText(requirement.action)} {requirement.displayName} on{" "}

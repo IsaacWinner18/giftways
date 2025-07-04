@@ -51,7 +51,8 @@ const [error, setError] = useState<string | null>(null)
     // Fetch real campaigns from API
     const fetchCampaigns = async () => {
       try {
-        console.log("Fetching campaigns...")
+        console.log("API_URL:", API_URL)
+        console.log("Fetching campaigns from:", `${API_URL}/campaigns`)
         setLoading(true)
         setError(null)
 
@@ -70,8 +71,19 @@ const [error, setError] = useState<string | null>(null)
         console.log("Campaigns response:", data)
 
         if (data.success && data.campaigns) {
+          console.log("All campaigns:", data.campaigns)
+          console.log("Current user:", user)
+          console.log("User ID:", user?.id)
+          console.log("User _id:", user?._id)
+          
           // Filter to show only user's campaigns (in real app, this would be done on backend)
-          const userCampaigns = data.campaigns.filter((campaign: Campaign) => campaign.creatorId === (user?.id ?? ""))
+          const userCampaigns = data.campaigns.filter((campaign: Campaign) => {
+            const userIdentifier = user?.id || user?._id || ""
+            const matches = campaign.creatorId === userIdentifier || campaign.creatorId === userIdentifier.toString()
+            console.log(`Campaign ${campaign.title}: creatorId=${campaign.creatorId}, userIdentifier=${userIdentifier}, matches=${matches}`)
+            return matches
+          })
+          console.log("Filtered user campaigns:", userCampaigns)
           setCampaigns(userCampaigns)
         } else {
           throw new Error(data.error || "Failed to fetch campaigns")
@@ -90,6 +102,10 @@ const [error, setError] = useState<string | null>(null)
     }
 
     if (user) {
+      fetchCampaigns()
+    } else {
+      // If no user, still fetch campaigns to see what's available
+      console.log("No user available, fetching all campaigns for debugging")
       fetchCampaigns()
     }
   }, [user])
@@ -270,6 +286,39 @@ const [error, setError] = useState<string | null>(null)
           </CardContent>
         </Card>
       </div>
+
+      {/* Debug Section - Show all campaigns */}
+      {/* <Card className="border-0 shadow-lg border-yellow-200 bg-yellow-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold text-yellow-900">Debug: All Campaigns</CardTitle>
+          <CardDescription className="text-yellow-800">
+            Showing all campaigns to help debug the filtering issue
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {campaigns.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-yellow-800">No campaigns found in the database</p>
+            </div>
+          ) : (
+            campaigns.map((campaign: Campaign) => (
+              <div key={campaign._id || campaign.id} className="p-4 border border-yellow-200 rounded-lg bg-white">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-semibold text-yellow-900">{campaign.title}</h4>
+                    <p className="text-sm text-yellow-700">Creator ID: {campaign.creatorId}</p>
+                    <p className="text-sm text-yellow-700">Creator Name: {campaign.creatorName}</p>
+                    <p className="text-sm text-yellow-700">Status: {campaign.status}</p>
+                  </div>
+                  <Badge className="bg-yellow-200 text-yellow-800">
+                    {campaign.creatorId === (user?.id || user?._id) ? "MATCHES" : "NO MATCH"}
+                  </Badge>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card> */}
 
       {/* Recent Campaigns */}
       <Card className="border-0 shadow-lg">

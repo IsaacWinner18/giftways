@@ -170,7 +170,7 @@ export function CreateCampaignContent() {
       // Simulate payment processing delay
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      setCampaignUrl(data.campaign.campaignUrl || `https://giftways.com/campaign/${data.campaign.id}`)
+      setCampaignUrl(`${process.env.NEXT_PUBLIC_BASE_URL || ''}${data.campaign.campaignUrl}` || `https://giftways.com/campaign/${data.campaign.id}`)
       setIsSuccess(true)
     } catch (error) {
       console.error("Error creating campaign:", error)
