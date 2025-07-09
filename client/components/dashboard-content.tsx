@@ -287,38 +287,6 @@ const [error, setError] = useState<string | null>(null)
         </Card>
       </div>
 
-      {/* Debug Section - Show all campaigns */}
-      {/* <Card className="border-0 shadow-lg border-yellow-200 bg-yellow-50">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-bold text-yellow-900">Debug: All Campaigns</CardTitle>
-          <CardDescription className="text-yellow-800">
-            Showing all campaigns to help debug the filtering issue
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {campaigns.length === 0 ? (
-            <div className="text-center py-4">
-              <p className="text-yellow-800">No campaigns found in the database</p>
-            </div>
-          ) : (
-            campaigns.map((campaign: Campaign) => (
-              <div key={campaign._id || campaign.id} className="p-4 border border-yellow-200 rounded-lg bg-white">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-semibold text-yellow-900">{campaign.title}</h4>
-                    <p className="text-sm text-yellow-700">Creator ID: {campaign.creatorId}</p>
-                    <p className="text-sm text-yellow-700">Creator Name: {campaign.creatorName}</p>
-                    <p className="text-sm text-yellow-700">Status: {campaign.status}</p>
-                  </div>
-                  <Badge className="bg-yellow-200 text-yellow-800">
-                    {campaign.creatorId === (user?.id || user?._id) ? "MATCHES" : "NO MATCH"}
-                  </Badge>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card> */}
 
       {/* Recent Campaigns */}
       <Card className="border-0 shadow-lg">
@@ -343,12 +311,12 @@ const [error, setError] = useState<string | null>(null)
               <Gift className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns yet</h3>
               <p className="text-gray-600 mb-4">Create your first giveaway campaign to get started!</p>
-              <Button
+              {/* <Button
                 asChild
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >
                 <Link href="/create-campaign">Create Campaign</Link>
-              </Button>
+              </Button> */}
             </div>
           ) : (
             campaigns.slice(0, 3).map((campaign: Campaign) => (
