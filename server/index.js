@@ -6,7 +6,7 @@ const cors = require("cors");
 const app = express();
 app.use(
   cors({
-    origin: "https://giftways.vercel.app",
+    origin: process.env.CORS_URI,
     credentials: true,
   })
 );

@@ -351,7 +351,7 @@ export default function CampaignPage({
               <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Gift className="w-6 h-6 text-white" />
               </div>
-              <div>
+              <div className="hidden md:block">
                 <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Giftways
                 </span>
@@ -372,7 +372,7 @@ export default function CampaignPage({
               </Button>
 
               {user ? (
-                <div className="flex items-center gap-3">
+                <div className=" hidden md:flex items-center gap-3">
                   <div className="text-right">
                     <div className="text-sm font-medium text-gray-900">
                       {user.name}
@@ -398,7 +398,7 @@ export default function CampaignPage({
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto md:px-4 px-2 py-8 max-w-6xl">
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Campaign Info */}
           <div className="space-y-6">
@@ -432,16 +432,16 @@ export default function CampaignPage({
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-100">
-                    <div className="text-3xl font-bold text-purple-900 mb-1">
+                  <div className="text-center md:p-6 p-3 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-100">
+                    <div className="md:text-3xl text-xl font-bold text-purple-900 mb-1">
                       ₦{safeNumber(campaignData.totalAmount).toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-600 font-medium">
                       Total Prize Pool
                     </div>
                   </div>
-                  <div className="text-center p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
-                    <div className="text-3xl font-bold text-emerald-900 mb-1">
+                  <div className="text-center md:p-6 p-3 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
+                    <div className="md:text-3xl text-xl font-bold text-emerald-900 mb-1">
                       ₦{safeNumber(campaignData.amountPerPerson)}
                     </div>
                     <div className="text-sm text-gray-600 font-medium">
@@ -537,7 +537,7 @@ export default function CampaignPage({
                     Sign in or create an account to participate in this giveaway
                   </p>
                   <Button
-                    onClick={() => window.location.href = "/giveaways"}
+                    onClick={() => window.location.href = "/"}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
                     <LogIn className="w-4 h-4 mr-2" />

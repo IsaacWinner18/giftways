@@ -15,8 +15,8 @@ export function LandingPage() {
   const [isLoginMode, setIsLoginMode] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
-    email: "demo@giftways.com",
-    password: "demo123",
+    email: "",
+    password: "",
     name: "",
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -34,7 +34,7 @@ export function LandingPage() {
       if (isLoginMode) {
         const res = await login(formData.email, formData.password)
         if (!res.success) {
-          setError(res.error || "Invalid credentials. Try demo@giftways.com / demo123")
+          setError(res.error || "Invalid credentials")
         }
       } else {
         // Registration mode
