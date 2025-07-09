@@ -1,8 +1,11 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 interface ProfileForm {
   name: string;
@@ -18,8 +21,8 @@ interface PasswordForm {
 }
 
 export default function ProfilePage() {
-  const { user, updateProfile, changePassword, logout, loading } = useAuth();
-  const [edit, setEdit] = useState(false);
+  const { user, updateProfile, loading } = useAuth();
+  const router = useRouter();
   const [form, setForm] = useState<ProfileForm>({
     name: user?.name || "",
     bankName: user?.bankName || "",
@@ -27,85 +30,163 @@ export default function ProfilePage() {
     accountName: user?.accountName || "",
     phoneNumber: user?.phoneNumber || "",
   });
-  const [pwForm, setPwForm] = useState<PasswordForm>({ oldPassword: "", newPassword: "" });
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
-  const [pwLoading, setPwLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (!user) return <div className="min-h-screen flex items-center justify-center">Not logged in.</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+      </div>
+    );
+  if (!user)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="bg-white/10 text-white px-6 py-4 rounded-xl shadow-lg text-lg">
+          Not logged in.
+        </div>
+      </div>
+    );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-  const handlePwChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPwForm({ ...pwForm, [e.target.name]: e.target.value });
   };
 
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setProfileLoading(true);
-    setMsg(""); setErr("");
+    setMsg("");
+    setErr("");
+    // JS validation for all fields
+    if (
+      !form.name ||
+      !form.bankName ||
+      !form.accountNumber ||
+      !form.accountName ||
+      !form.phoneNumber
+    ) {
+      setProfileLoading(false);
+      setErr("All fields are required.");
+      return;
+    }
     const res = await updateProfile(form);
     setProfileLoading(false);
     if (res.success) {
       setMsg("Profile updated!");
-      setEdit(false);
+      setTimeout(() => router.push("/giveaways"), 1000);
     } else {
       setErr(res.error || "Update failed");
     }
   };
 
-  const handlePwSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setPwLoading(true);
-    setMsg(""); setErr("");
-    const res = await changePassword(pwForm.oldPassword, pwForm.newPassword);
-    setPwLoading(false);
-    if (res.success) {
-      setMsg("Password changed!");
-      setPwForm({ oldPassword: "", newPassword: "" });
-    } else {
-      setErr(res.error || "Password change failed");
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-purple-50">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md space-y-6">
-        <h2 className="text-2xl font-bold mb-2">My Profile</h2>
-        {msg && <div className="text-green-600 text-sm">{msg}</div>}
-        {err && <div className="text-red-600 text-sm">{err}</div>}
-        {!edit ? (
-          <div className="space-y-2">
-            <div><b>Name:</b> {user.name}</div>
-            <div><b>Email:</b> {user.email}</div>
-            <div><b>Bank Name:</b> {user.bankName || "-"}</div>
-            <div><b>Account Number:</b> {user.accountNumber || "-"}</div>
-            <div><b>Account Name:</b> {user.accountName || "-"}</div>
-            <div><b>Phone:</b> {user.phoneNumber || "-"}</div>
-            <Button onClick={() => setEdit(true)} className="mt-2 w-full">Edit Profile</Button>
-            <Button onClick={logout} variant="outline" className="mt-2 w-full">Logout</Button>
-          </div>
-        ) : (
-          <form onSubmit={handleProfileSubmit} className="space-y-2">
-            <Input name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required />
-            <Input name="bankName" placeholder="Bank Name" value={form.bankName} onChange={handleChange} />
-            <Input name="accountNumber" placeholder="Account Number" value={form.accountNumber} onChange={handleChange} />
-            <Input name="accountName" placeholder="Account Name" value={form.accountName} onChange={handleChange} />
-            <Input name="phoneNumber" placeholder="Phone Number" value={form.phoneNumber} onChange={handleChange} />
-            <Button type="submit" className="w-full" disabled={profileLoading}>{profileLoading ? "Saving..." : "Save"}</Button>
-            <Button type="button" variant="outline" className="w-full" onClick={() => setEdit(false)}>Cancel</Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <Card className="w-full max-w-md bg-black/40 border-white/20 backdrop-blur-xl shadow-xl">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-2xl font-bold text-white">
+            Complete Your Profile
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {msg && (
+            <div className="bg-green-100 text-green-700 px-3 py-2 rounded text-sm">
+              {msg}
+            </div>
+          )}
+          {err && (
+            <div className="bg-red-100 text-red-700 px-3 py-2 rounded text-sm">
+              {err}
+            </div>
+          )}
+          <form onSubmit={handleProfileSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gray-200">
+                Full Name
+              </Label>
+              <Input
+                name="name"
+                id="name"
+                placeholder="Full Name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bankName" className="text-gray-200">
+                Bank Name
+              </Label>
+              <Input
+                name="bankName"
+                id="bankName"
+                placeholder="Bank Name"
+                value={form.bankName}
+                onChange={handleChange}
+                required
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="accountNumber" className="text-gray-200">
+                Account Number
+              </Label>
+              <Input
+                name="accountNumber"
+                id="accountNumber"
+                placeholder="Account Number"
+                value={form.accountNumber}
+                onChange={handleChange}
+                required
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="accountName" className="text-gray-200">
+                Account Name
+              </Label>
+              <Input
+                name="accountName"
+                id="accountName"
+                placeholder="Account Name"
+                value={form.accountName}
+                onChange={handleChange}
+                required
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber" className="text-gray-200">
+                Phone Number
+              </Label>
+              <Input
+                name="phoneNumber"
+                id="phoneNumber"
+                placeholder="Phone Number"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                required
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3"
+              disabled={profileLoading}
+            >
+              {profileLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Saving...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">Save</div>
+              )}
+            </Button>
           </form>
-        )}
-        <form onSubmit={handlePwSubmit} className="space-y-2 border-t pt-4 mt-4">
-          <h3 className="font-semibold">Change Password</h3>
-          <Input name="oldPassword" placeholder="Old Password" type="password" value={pwForm.oldPassword} onChange={handlePwChange} required />
-          <Input name="newPassword" placeholder="New Password" type="password" value={pwForm.newPassword} onChange={handlePwChange} required />
-          <Button type="submit" className="w-full" disabled={pwLoading}>{pwLoading ? "Changing..." : "Change Password"}</Button>
-        </form>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
-} 
+}

@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface RegisterData {
   name: string;
@@ -35,16 +35,17 @@ interface AuthResponse {
     phoneNumber?: string;
     isAdmin?: boolean;
     participatedCampaigns?: string[];
+    balance?: number; // Added balance field
   };
 }
 
 // JWT helpers
-const TOKEN_KEY = 'jwt_token';
+const TOKEN_KEY = "jwt_token";
 export function setToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
 }
 export function getToken() {
-  return typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+  return typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
 }
 export function removeToken() {
   localStorage.removeItem(TOKEN_KEY);
@@ -57,17 +58,20 @@ function authHeaders(): Record<string, string> {
 
 export async function register(data: RegisterData): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
   return res.json();
 }
 
-export async function login(email: string, password: string): Promise<AuthResponse> {
+export async function login(
+  email: string,
+  password: string
+): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
   return res.json();
@@ -80,19 +84,24 @@ export async function getProfile(): Promise<AuthResponse> {
   return res.json();
 }
 
-export async function updateProfile(data: UpdateProfileData): Promise<AuthResponse> {
+export async function updateProfile(
+  data: UpdateProfileData
+): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/profile`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(data),
   });
   return res.json();
 }
 
-export async function changePassword(oldPassword: string, newPassword: string): Promise<AuthResponse> {
+export async function changePassword(
+  oldPassword: string,
+  newPassword: string
+): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/reset-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ oldPassword, newPassword }),
   });
   return res.json();
@@ -100,17 +109,20 @@ export async function changePassword(oldPassword: string, newPassword: string): 
 
 export async function forgotPassword(email: string): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/forgot-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
   return res.json();
 }
 
-export async function resetPasswordWithToken(token: string, newPassword: string): Promise<AuthResponse> {
+export async function resetPasswordWithToken(
+  token: string,
+  newPassword: string
+): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/reset-password/${token}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ newPassword }),
   });
   return res.json();
@@ -118,4 +130,4 @@ export async function resetPasswordWithToken(token: string, newPassword: string)
 
 export function logout() {
   removeToken();
-} 
+}

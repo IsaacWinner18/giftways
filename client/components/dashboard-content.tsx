@@ -215,7 +215,7 @@ const [error, setError] = useState<string | null>(null)
       {/* Welcome Section */}
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.name?.split(" ")[0]}! 👋</h1>
+          <h1 className="md:text-3xl text-xl font-bold text-gray-900">Welcome back, {user?.name?.split(" ")[0]}! 👋</h1>
           <p className="text-gray-600 mt-1">Here&apos;s what&apos;s happening with your campaigns today.</p>
         </div>
       </div>
@@ -223,7 +223,7 @@ const [error, setError] = useState<string | null>(null)
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-          <CardContent className="p-6">
+          <CardContent className="md:p-6 p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-purple-100 text-sm font-medium">Total Campaigns</p>

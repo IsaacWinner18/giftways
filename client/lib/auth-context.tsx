@@ -1,7 +1,18 @@
-"use client"
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getToken, setToken, logout as apiLogout, register, login, getProfile, updateProfile, changePassword, forgotPassword, resetPasswordWithToken } from './auth';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import {
+  getToken,
+  setToken,
+  logout as apiLogout,
+  register,
+  login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  forgotPassword,
+  resetPasswordWithToken,
+} from "./auth";
 
 interface User {
   id: string;
@@ -20,6 +31,7 @@ interface User {
   totalCampaigns?: number;
   totalDistributed?: number;
   totalParticipants?: number;
+  balance?: number; // Added balance field
 }
 
 interface RegisterData {
@@ -54,9 +66,15 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<AuthResponse>;
   logout: () => void;
   updateProfile: (data: UpdateProfileData) => Promise<AuthResponse>;
-  changePassword: (oldPassword: string, newPassword: string) => Promise<AuthResponse>;
+  changePassword: (
+    oldPassword: string,
+    newPassword: string
+  ) => Promise<AuthResponse>;
   forgotPassword: (email: string) => Promise<AuthResponse>;
-  resetPasswordWithToken: (token: string, newPassword: string) => Promise<AuthResponse>;
+  resetPasswordWithToken: (
+    token: string,
+    newPassword: string
+  ) => Promise<AuthResponse>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -121,7 +139,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return forgotPassword(email);
   };
 
-  const resetPasswordWithTokenFn = async (token: string, newPassword: string) => {
+  const resetPasswordWithTokenFn = async (
+    token: string,
+    newPassword: string
+  ) => {
     return resetPasswordWithToken(token, newPassword);
   };
 
@@ -153,6 +174,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
-} 
+}

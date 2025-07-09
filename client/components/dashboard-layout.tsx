@@ -66,6 +66,14 @@ export function DashboardLayout() {
                   <BreadcrumbLink href="/" className="text-purple-600">
                     Giftways
                   </BreadcrumbLink>
+                  
+                </BreadcrumbItem>
+
+                 <BreadcrumbItem className=" md:hidden">
+                  <BreadcrumbLink href="/" className="text-purple-600">
+                   Home /
+                  </BreadcrumbLink>
+                  
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
