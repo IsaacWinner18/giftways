@@ -537,7 +537,7 @@ export default function CampaignPage({
                     Sign in or create an account to participate in this giveaway
                   </p>
                   <Button
-                    onClick={() => window.location.href = "/register"}
+                    onClick={() => window.location.href = "/giveaways"}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
