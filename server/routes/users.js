@@ -8,7 +8,7 @@ const crypto = require("crypto");
 // Register
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, fingerprint } = req.body;
     if (!name || !email || !password) {
       return res
         .status(400)
@@ -18,9 +18,27 @@ router.post("/register", async (req, res) => {
     if (existing) {
       return res.status(400).json({ error: "Email already registered" });
     }
+    // Check if fingerprint is already used by another user
+    if (fingerprint) {
+      const userWithFingerprint = await User.findOne({
+        fingerprints: fingerprint,
+      });
+      if (userWithFingerprint) {
+        return res
+          .status(400)
+          .json({
+            error: "This device is already registered with another account.",
+          });
+      }
+    }
     const hashed = await bcrypt.hash(password, 10);
-    // Only save name, email, and password at registration
-    const user = new User({ name, email, password: hashed });
+    // Save fingerprint if provided
+    const user = new User({
+      name,
+      email,
+      password: hashed,
+      fingerprints: fingerprint ? [fingerprint] : [],
+    });
     await user.save();
     res.status(201).json({
       success: true,
@@ -39,7 +57,7 @@ router.post("/register", async (req, res) => {
 // Login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fingerprint } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
@@ -50,6 +68,23 @@ router.post("/login", async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).json({ error: "Invalid credentials" });
+    }
+    // If fingerprint is provided, check if it's already used by another user
+    if (fingerprint) {
+      const userWithFingerprint = await User.findOne({
+        fingerprints: fingerprint,
+        _id: { $ne: user._id },
+      });
+      if (userWithFingerprint) {
+        return res
+          .status(400)
+          .json({ error: "This device is already used by another account." });
+      }
+      // Add fingerprint to user's fingerprints array if not already present
+      if (!user.fingerprints.includes(fingerprint)) {
+        user.fingerprints.push(fingerprint);
+        await user.save();
+      }
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",

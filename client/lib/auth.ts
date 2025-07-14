@@ -5,6 +5,7 @@ interface RegisterData {
   email: string;
   password: string;
   socialLinks?: Record<string, string>;
+  fingerprint?: string;
 }
 
 interface UpdateProfileData {
@@ -36,6 +37,7 @@ interface AuthResponse {
     isAdmin?: boolean;
     participatedCampaigns?: string[];
     balance?: number; // Added balance field
+    campaignsCreatedCount?: number; // Added campaignsCreatedCount field
   };
 }
 
@@ -67,12 +69,15 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
 
 export async function login(
   email: string,
-  password: string
+  password: string,
+  fingerprint?: string
 ): Promise<AuthResponse> {
   const res = await fetch(`${API_URL}/users/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(
+      fingerprint ? { email, password, fingerprint } : { email, password }
+    ),
   });
   return res.json();
 }

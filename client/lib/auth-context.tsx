@@ -32,6 +32,7 @@ interface User {
   totalDistributed?: number;
   totalParticipants?: number;
   balance?: number; // Added balance field
+  campaignsCreatedCount?: number; // Added campaignsCreatedCount field
 }
 
 interface RegisterData {
@@ -39,6 +40,7 @@ interface RegisterData {
   email: string;
   password: string;
   socialLinks?: Record<string, string>;
+  fingerprint?: string;
 }
 
 interface UpdateProfileData {
@@ -62,7 +64,11 @@ interface AuthResponse {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthResponse>;
+  login: (
+    email: string,
+    password: string,
+    fingerprint?: string
+  ) => Promise<AuthResponse>;
   register: (data: RegisterData) => Promise<AuthResponse>;
   logout: () => void;
   updateProfile: (data: UpdateProfileData) => Promise<AuthResponse>;
@@ -106,8 +112,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchProfile();
   }, []);
 
-  const loginFn = async (email: string, password: string) => {
-    const res = await login(email, password);
+  const loginFn = async (
+    email: string,
+    password: string,
+    fingerprint?: string
+  ) => {
+    const res = await login(email, password, fingerprint);
     if (res.success && res.token) {
       setToken(res.token);
       await refreshProfile();

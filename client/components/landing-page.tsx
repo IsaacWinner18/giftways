@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,6 +24,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 export function LandingPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -39,6 +38,16 @@ export function LandingPage() {
   const [error, setError] = useState("");
   const { login, register } = useAuth();
   const [success, setSuccess] = useState("");
+  const [fingerprint, setFingerprint] = useState<string>("");
+
+  // Collect fingerprint on mount
+  useEffect(() => {
+    FingerprintJS.load().then((fp) => {
+      fp.get().then((result) => {
+        setFingerprint(result.visitorId);
+      });
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +57,8 @@ export function LandingPage() {
 
     try {
       if (isLoginMode) {
-        const res = await login(formData.email, formData.password);
+        // Pass fingerprint to backend
+        const res = await login(formData.email, formData.password, fingerprint);
         if (!res.success) {
           setError(res.error || "Invalid credentials");
         }
@@ -58,6 +68,7 @@ export function LandingPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          fingerprint,
         });
         if (res.success) {
           setSuccess("Registration successful! Please log in.");
@@ -116,7 +127,7 @@ export function LandingPage() {
               Trusted by 10,000+ creators worldwide
             </div>
 
-            <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+            <h1 className="text-4xl md:text-3xl lg:text-5xl font-bold leading-tight ">
               <span className="bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
                 Transform
               </span>
@@ -126,7 +137,7 @@ export function LandingPage() {
               </span>
             </h1>
 
-            <p className="text-xl text-gray-300 max-w-lg leading-relaxed">
+            <p className="text-sm md:text-lg text-gray-300 max-w-lg leading-relaxed">
               Create monetized giveaway campaigns or participate in exciting
               giveaways. Win real money prizes by completing simple social media
               tasks.
@@ -193,23 +204,31 @@ export function LandingPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">₦2.5M+</div>
-                <div className="text-sm text-gray-400">Distributed</div>
+                <div className="text-lg md:text-3xl font-bold text-white">
+                  ₦2.5M+
+                </div>
+                <div className="text-xs md:text-sm text-gray-400">
+                  Distributed
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">10K+</div>
-                <div className="text-sm text-gray-400">Users</div>
+                <div className="text-lg md:text-3xl font-bold text-white">
+                  10K+
+                </div>
+                <div className="text-xs md:text-sm text-gray-400">Users</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">99.9%</div>
-                <div className="text-sm text-gray-400">Uptime</div>
+                <div className="text-lg md:text-3xl font-bold text-white">
+                  99.9%
+                </div>
+                <div className="text-xs md:text-sm text-gray-400">Uptime</div>
               </div>
             </div>
           </div>
 
           {/* Right Side - Login Form */}
           <div className="flex justify-center" id="auth-form">
-            <Card className="w-full max-w-md bg-black/40 border-white/20 backdrop-blur-xl">
+            <Card className="w-full max-w-md bg-black/40 border-white/20 backdrop-blur-xl px-3">
               <CardHeader className="text-center space-y-2">
                 <CardTitle className="text-2xl font-bold text-white">
                   {isLoginMode ? "Welcome Back" : "Get Started"}
@@ -290,6 +309,16 @@ export function LandingPage() {
                         )}
                       </button>
                     </div>
+                    {isLoginMode && (
+                      <div className="text-right mt-1">
+                        <Link
+                          href="/forgot-password"
+                          className="text-xs text-purple-300 hover:text-purple-200 underline"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
                   {error && (

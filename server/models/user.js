@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     { type: mongoose.Schema.Types.ObjectId, ref: "Giveaway" },
   ],
   campaignsCreatedCount: { type: Number, default: 0 },
+  fingerprints: [{ type: String }], // Array of device fingerprints used by the user
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
   createdAt: { type: Date, default: Date.now },
