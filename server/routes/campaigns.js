@@ -33,51 +33,36 @@ router.post("/", async (req, res) => {
     if (totalAmount < 2000) {
       return res.status(400).json({ error: "Minimum total amount is ₦2,000" });
     }
-    if (!["equal", "order", "random"].includes(distributionRule)) {
+    if (!["order", "random"].includes(distributionRule)) {
       return res.status(400).json({ error: "Invalid distribution rule" });
     }
-    const minPerPerson = 1000;
+    const minPerPerson = 500;
     const maxBeneficiaries = Math.floor(totalAmount / minPerPerson);
+    const maxAllowedParticipants = maxBeneficiaries * 100;
 
-    if (distributionRule === "equal") {
-      if (!maxParticipants)
-        return res.status(400).json({ error: "Max participants required" });
-      if (maxParticipants < 2 || maxParticipants > maxBeneficiaries) {
-        return res.status(400).json({
-          error: `Max participants must be between 2 and ${maxBeneficiaries}`,
-        });
-      }
+    if (!beneficiaries)
+      return res
+        .status(400)
+        .json({ error: "Number of beneficiaries required" });
+    if (beneficiaries < 2 || beneficiaries > maxBeneficiaries) {
+      return res.status(400).json({
+        error: `Beneficiaries must be between 2 and ${maxBeneficiaries}`,
+      });
     }
-    if (distributionRule === "order" || distributionRule === "random") {
-      if (!beneficiaries)
-        return res
-          .status(400)
-          .json({ error: "Number of beneficiaries required" });
-      if (beneficiaries < 2 || beneficiaries > maxBeneficiaries) {
-        return res.status(400).json({
-          error: `Beneficiaries must be between 2 and ${maxBeneficiaries}`,
-        });
-      }
-      if (distributionRule === "random") {
-        if (!maxParticipants)
-          return res.status(400).json({ error: "Max participants required" });
-        if (
-          maxParticipants < beneficiaries ||
-          maxParticipants > beneficiaries * 3
-        ) {
-          return res.status(400).json({
-            error: `Max participants must be between ${beneficiaries} and ${
-              beneficiaries * 3
-            }`,
-          });
-        }
-      }
+    if (!maxParticipants)
+      return res.status(400).json({ error: "Max participants required" });
+    if (maxParticipants < 2 || maxParticipants > maxAllowedParticipants) {
+      return res.status(400).json({
+        error: `Max participants must be between 2 and ${maxAllowedParticipants}`,
+      });
+    }
+    if (beneficiaries > maxParticipants) {
+      return res.status(400).json({
+        error: `Beneficiaries cannot be greater than max participants`,
+      });
     }
 
-    const amountPerPerson = Math.floor(
-      totalAmount /
-        (distributionRule === "equal" ? maxParticipants : beneficiaries)
-    );
+    const amountPerPerson = Math.floor(totalAmount / beneficiaries);
 
     const giveaway = new Giveaway({
       title,
@@ -93,6 +78,10 @@ router.post("/", async (req, res) => {
       amountPerPerson,
     });
     await giveaway.save();
+    // Increment campaignsCreatedCount for the creator
+    await User.findByIdAndUpdate(creatorId, {
+      $inc: { campaignsCreatedCount: 1 },
+    });
     // Add campaignUrl to the response
     const campaignObj = giveaway.toObject();
     campaignObj.campaignUrl = `/campaign/${giveaway._id}`;
@@ -228,10 +217,7 @@ router.post("/:id/participants", async (req, res) => {
       });
       let winners = [];
       let amountPerWinner = 0;
-      if (campaign.distributionRule === "equal") {
-        winners = participantUsers;
-        amountPerWinner = campaign.amountPerPerson;
-      } else if (campaign.distributionRule === "order") {
+      if (campaign.distributionRule === "order") {
         // First N beneficiaries
         winners = participantUsers.slice(0, campaign.beneficiaries);
         amountPerWinner = Math.floor(

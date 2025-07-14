@@ -1,13 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Gift,
   Search,
@@ -20,9 +31,9 @@ import {
   Users,
   Calendar,
   Target,
-} from "lucide-react"
-import Link from "next/link"
-import { useAuth } from "@/lib/auth-context"
+} from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -43,121 +54,127 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
-  const { user } = useAuth()
-  const [campaigns, setCampaigns] = useState<Campaign[]>([])
-  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("newest")
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth();
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await fetch(`${API_URL}/campaigns`)
-        const data = await response.json()
+        const response = await fetch(`${API_URL}/campaigns`);
+        const data = await response.json();
         if (data.success) {
-          setCampaigns(data.campaigns)
+          setCampaigns(data.campaigns);
         }
       } catch (error) {
-        console.error("Error fetching campaigns:", error)
+        console.error("Error fetching campaigns:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchCampaigns()
-  }, [])
+    fetchCampaigns();
+  }, []);
 
   useEffect(() => {
     const filtered = campaigns.filter((campaign) => {
       // Search filter
       if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase()
+        const searchLower = searchTerm.toLowerCase();
         if (
           !campaign.title.toLowerCase().includes(searchLower) &&
           !campaign.description.toLowerCase().includes(searchLower) &&
           !campaign.creatorName.toLowerCase().includes(searchLower)
         ) {
-          return false
+          return false;
         }
       }
 
       // Status filter
       if (statusFilter !== "all" && campaign.status !== statusFilter) {
-        return false
+        return false;
       }
 
-      return true
-    })
+      return true;
+    });
 
     // Sort campaigns
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         case "oldest":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         case "highest":
-          return b.totalAmount - a.totalAmount
+          return b.totalAmount - a.totalAmount;
         case "lowest":
-          return a.totalAmount - b.totalAmount
+          return a.totalAmount - b.totalAmount;
         case "participants":
-          return b.currentParticipants - a.currentParticipants
+          return b.currentParticipants - a.currentParticipants;
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    setFilteredCampaigns(filtered)
-  }, [campaigns, searchTerm, statusFilter, sortBy])
+    setFilteredCampaigns(filtered);
+  }, [campaigns, searchTerm, statusFilter, sortBy]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200"
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
       case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "pending":
-        return "bg-amber-100 text-amber-800 border-amber-200"
+        return "bg-amber-100 text-amber-800 border-amber-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const handleCampaignAction = (action: string, campaignId: string) => {
     switch (action) {
       case "edit":
         // Navigate to edit page
-        window.location.href = `/campaigns/${campaignId}/edit`
-        break
+        window.location.href = `/campaigns/${campaignId}/edit`;
+        break;
       case "duplicate":
-        alert(`Duplicating campaign ${campaignId}`)
-        break
+        alert(`Duplicating campaign ${campaignId}`);
+        break;
       case "pause":
-        alert(`Pausing campaign ${campaignId}`)
-        break
+        alert(`Pausing campaign ${campaignId}`);
+        break;
       case "delete":
         if (confirm("Are you sure you want to delete this campaign?")) {
-          alert(`Deleting campaign ${campaignId}`)
+          alert(`Deleting campaign ${campaignId}`);
         }
-        break
+        break;
       default:
-        break
+        break;
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Loading Campaigns...</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              Loading Campaigns...
+            </h1>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -170,7 +187,7 @@ export default function CampaignsPage() {
               <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Gift className="w-6 h-6 text-white" />
               </div>
-              <div>
+              <div className="md:block hidden">
                 <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Giftways
                 </span>
@@ -179,15 +196,17 @@ export default function CampaignsPage() {
             </Link>
 
             <div className="flex items-center gap-4">
-              <Link href="/create-campaign">
+              <Link href="/dashboard">
                 <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                   Create Campaign
                 </Button>
               </Link>
               {user && (
-                <div className="flex items-center gap-3">
+                <div className="hidden md:flex items-center gap-3">
                   <div className="text-right">
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {user.name}
+                    </div>
                     <div className="text-xs text-gray-500">{user.email}</div>
                   </div>
                   <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -203,8 +222,12 @@ export default function CampaignsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">All Campaigns</h1>
-          <p className="text-gray-600">Manage and monitor all your giveaway campaigns</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            All Campaigns
+          </h1>
+          <p className="text-gray-600">
+            Manage and monitor all your giveaway campaigns
+          </p>
         </div>
 
         {/* Filters and Search */}
@@ -242,7 +265,9 @@ export default function CampaignsPage() {
                   <SelectItem value="oldest">Oldest First</SelectItem>
                   <SelectItem value="highest">Highest Prize</SelectItem>
                   <SelectItem value="lowest">Lowest Prize</SelectItem>
-                  <SelectItem value="participants">Most Participants</SelectItem>
+                  <SelectItem value="participants">
+                    Most Participants
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -259,13 +284,15 @@ export default function CampaignsPage() {
           <Card className="border-0 shadow-lg">
             <CardContent className="text-center py-12">
               <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No campaigns found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No campaigns found
+              </h3>
               <p className="text-gray-600 mb-6">
                 {searchTerm || statusFilter !== "all"
                   ? "Try adjusting your search or filters"
                   : "Create your first campaign to get started"}
               </p>
-              <Link href="/create-campaign">
+              <Link href="/dashboard">
                 <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                   Create Campaign
                 </Button>
@@ -275,22 +302,32 @@ export default function CampaignsPage() {
         ) : (
           <div className="space-y-6">
             {filteredCampaigns.map((campaign: Campaign) => (
-              <Card key={campaign._id || campaign.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-200">
-                <CardContent className="p-6">
+              <Card
+                key={campaign._id || campaign.id}
+                className="border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <CardContent className="p-3 md:p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-900">{campaign.title}</h3>
-                        <Badge className={getStatusColor(campaign.status)}>{campaign.status}</Badge>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {campaign.title}
+                        </h3>
+                        <Badge className={getStatusColor(campaign.status)}>
+                          {campaign.status}
+                        </Badge>
                         <Badge variant="outline" className="capitalize">
                           {campaign.socialPlatform}
                         </Badge>
                       </div>
-                      <p className="text-gray-600 mb-3">{campaign.description}</p>
+                      <p className="text-gray-600 mb-3">
+                        {campaign.description}
+                      </p>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          Created {new Date(campaign.createdAt).toLocaleDateString()}
+                          Created{" "}
+                          {new Date(campaign.createdAt).toLocaleDateString()}
                         </div>
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4" />
@@ -302,54 +339,36 @@ export default function CampaignsPage() {
                         </div>
                       </div>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleCampaignAction("edit", campaign.id || campaign._id || "")}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit Campaign
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleCampaignAction("duplicate", campaign.id || campaign._id || "")}>
-                          <Gift className="w-4 h-4 mr-2" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleCampaignAction("pause", campaign.id || campaign._id || "")}>
-                          <Target className="w-4 h-4 mr-2" />
-                          Pause Campaign
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleCampaignAction("delete", campaign.id || campaign._id || "")}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
-                      <div className="text-lg font-bold text-purple-900">₦{campaign.totalAmount.toLocaleString()}</div>
+                      <div className="text-lg font-bold text-purple-900">
+                        ₦{campaign.totalAmount.toLocaleString()}
+                      </div>
                       <div className="text-xs text-gray-600">Total Prize</div>
                     </div>
                     <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
                       <div className="text-lg font-bold text-blue-900">
-                        {campaign.currentParticipants}/{campaign.maxParticipants}
+                        {campaign.currentParticipants}/
+                        {campaign.maxParticipants}
                       </div>
                       <div className="text-xs text-gray-600">Participants</div>
                     </div>
                     <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                      <div className="text-lg font-bold text-emerald-900">₦{campaign.amountPerPerson}</div>
+                      <div className="text-lg font-bold text-emerald-900">
+                        ₦{campaign.amountPerPerson}
+                      </div>
                       <div className="text-xs text-gray-600">Per Winner</div>
                     </div>
                     <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-100">
                       <div className="text-lg font-bold text-orange-900">
-                        {Math.round((campaign.currentParticipants / campaign.maxParticipants) * 100)}%
+                        {Math.round(
+                          (campaign.currentParticipants /
+                            campaign.maxParticipants) *
+                            100
+                        )}
+                        %
                       </div>
                       <div className="text-xs text-gray-600">Complete</div>
                     </div>
@@ -359,31 +378,46 @@ export default function CampaignsPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Progress</span>
                       <span className="font-medium text-gray-900">
-                        {campaign.currentParticipants} of {campaign.maxParticipants} participants
+                        {campaign.currentParticipants} of{" "}
+                        {campaign.maxParticipants} participants
                       </span>
                     </div>
-                    <Progress value={(campaign.currentParticipants / campaign.maxParticipants) * 100} className="h-2" />
+                    <Progress
+                      value={
+                        (campaign.currentParticipants /
+                          campaign.maxParticipants) *
+                        100
+                      }
+                      className="h-2"
+                    />
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      View Details
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      asChild
+                    >
+                      <Link
+                        href={`/campaigns/${
+                          campaign.id || campaign._id || ""
+                        }/details`}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Details
+                      </Link>
                     </Button>
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/campaign/${campaign.id || campaign._id || ""}`} className="flex items-center gap-2">
+                      <Link
+                        href={`/campaign/${campaign.id || campaign._id || ""}`}
+                        className="flex items-center gap-2"
+                      >
                         <ExternalLink className="w-4 h-4" />
                         Public Page
                       </Link>
                     </Button>
-                    {campaign.status === "active" && (
-                      <Button
-                        size="sm"
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 ml-auto"
-                      >
-                        Manage Campaign
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -392,5 +426,5 @@ export default function CampaignsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

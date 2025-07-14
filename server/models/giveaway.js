@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const socialRequirementSchema = new mongoose.Schema({
   platform: { type: String, required: true },
@@ -16,14 +16,18 @@ const giveawaySchema = new mongoose.Schema({
   totalAmount: { type: Number, required: true },
   maxParticipants: { type: Number },
   beneficiaries: { type: Number },
-  distributionRule: { type: String, enum: ['equal', 'order', 'random'], required: true },
+  distributionRule: { type: String, enum: ["order", "random"], required: true },
   timeLimit: { type: Number },
-  status: { type: String, enum: ['active', 'completed', 'cancelled'], default: 'active' },
+  status: {
+    type: String,
+    enum: ["active", "completed", "cancelled"],
+    default: "active",
+  },
   amountPerPerson: { type: Number },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-const Giveaway = mongoose.model('Giveaway', giveawaySchema);
+const Giveaway = mongoose.model("Giveaway", giveawaySchema);
 
-module.exports = Giveaway; 
+module.exports = Giveaway;

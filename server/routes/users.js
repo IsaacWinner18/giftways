@@ -24,7 +24,12 @@ router.post("/register", async (req, res) => {
     await user.save();
     res.status(201).json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        campaignsCreatedCount: user.campaignsCreatedCount,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
@@ -52,7 +57,12 @@ router.post("/login", async (req, res) => {
     res.json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        campaignsCreatedCount: user.campaignsCreatedCount,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
@@ -116,6 +126,7 @@ router.put("/profile", auth, async (req, res) => {
         accountNumber: user.accountNumber,
         accountName: user.accountName,
         phoneNumber: user.phoneNumber,
+        campaignsCreatedCount: user.campaignsCreatedCount,
       },
     });
   } catch (error) {

@@ -1,32 +1,63 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Copy, AlertCircle } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Copy, AlertCircle, ExternalLink } from "lucide-react";
 
 interface CampaignSuccessPageProps {
-  campaignUrl: string
+  campaignUrl: string;
 }
 
 export function CampaignSuccessPage({ campaignUrl }: CampaignSuccessPageProps) {
   return (
     <div className="space-y-4">
       <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <Label className="text-sm font-medium text-blue-900 mb-2 block">Your Campaign URL:</Label>
+        <Label className="text-sm font-medium text-blue-900 mb-2 block">
+          Your Campaign URL:
+        </Label>
         <div className="flex items-center gap-2">
-          <Input value={campaignUrl} readOnly className="bg-white border-blue-200 text-blue-900 font-mono text-sm" />
+          <Input
+            value={campaignUrl}
+            readOnly
+            className="bg-white border-blue-200 text-blue-900 font-mono text-sm"
+          />
           <Button
-            onClick={() => navigator.clipboard.writeText(campaignUrl)}
+            onClick={() => window.open(campaignUrl, "_blank")}
             variant="outline"
             size="sm"
             className="border-blue-200 text-blue-600 hover:bg-blue-50"
           >
-            <Copy className="w-4 h-4" />
+            <ExternalLink className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <Button
+            onClick={async () => {
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: "Check out this campaign!",
+                    url: campaignUrl,
+                  });
+                } catch (err) {
+                  // User cancelled or error
+                }
+              } else {
+                navigator.clipboard.writeText(campaignUrl);
+                alert("Link copied to clipboard!");
+              }
+            }}
+            variant="outline"
+            size="sm"
+            className="border-blue-200 text-blue-600 hover:bg-blue-50"
+          >
+            <Copy className="w-4 h-4 mr-1" /> Share
           </Button>
         </div>
         <p className="text-xs text-blue-700 mt-2">
-          Share this link with your audience so they can participate in your giveaway
+          Share this link with your audience so they can participate in your
+          giveaway
         </p>
       </div>
 
@@ -36,12 +67,13 @@ export function CampaignSuccessPage({ campaignUrl }: CampaignSuccessPageProps) {
           <div className="text-sm text-amber-800">
             <p className="font-medium mb-1">Important:</p>
             <p>
-              As the creator, you can view your campaign page but cannot participate in your own giveaway. You can
-              manage your campaign from the dashboard.
+              As the creator, you can view your campaign page but cannot
+              participate in your own giveaway. You can manage your campaign
+              from the dashboard.
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

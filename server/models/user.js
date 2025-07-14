@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   participatedCampaigns: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Giveaway" },
   ],
+  campaignsCreatedCount: { type: Number, default: 0 },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
   createdAt: { type: Date, default: Date.now },

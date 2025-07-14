@@ -39,9 +39,11 @@ import {
 import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const CAMPAIGN_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface CampaignData {
-  id: string;
+  _id?: string;
+  id?: string;
   title: string;
   description: string;
   creatorId: string;
@@ -134,7 +136,8 @@ export default function CampaignDetailsPage({
 
   const handleCopyUrl = () => {
     if (campaign) {
-      navigator.clipboard.writeText(campaign.campaignUrl);
+      const campaignLink = `${CAMPAIGN_URL}/${campaign._id}`;
+      navigator.clipboard.writeText(campaignLink);
       alert("Campaign URL copied to clipboard!");
     }
   };
@@ -197,20 +200,9 @@ export default function CampaignDetailsPage({
               <Link href="/campaigns">
                 <Button variant="outline" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Campaigns
+                  Back
                 </Button>
               </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Gift className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">
-                    {campaign.title}
-                  </h1>
-                  <div className="text-sm text-gray-500">Campaign Details</div>
-                </div>
-              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -219,17 +211,10 @@ export default function CampaignDetailsPage({
                 Copy URL
               </Button>
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/campaign/${campaign.id}`}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Public
+                <Link href={`${CAMPAIGN_URL}/${campaign._id}`}>
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Visit URL
                 </Link>
-              </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Manage
               </Button>
             </div>
           </div>
